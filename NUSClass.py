@@ -69,12 +69,6 @@ class Tutorial(NUSClass) :
 
 class Recitation(NUSClass) :
 
-    #Fields
-    slot = None
-    start = None
-    end = None
-    day = None
-
     def __init__(self, slot, day, start, end, mod) :
         self.slot = slot
         self.day = day
