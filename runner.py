@@ -1,11 +1,9 @@
-from Lecture import Lecture
 from NUSModule import NUSModule
-from Recitation import Recitation
-from Tutorial import Tutorial
+from NUSClass import *
 from timetableZ3 import TimeTableSchedulerZ3
 
 
-f = open("input.in","r")
+f = open("tests/input.in","r")
 print("Input File exists ! \nReading File now ...")
 
 semesterMods = dict()

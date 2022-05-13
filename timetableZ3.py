@@ -2,7 +2,7 @@ from socket import timeout
 from z3 import *
 from NUSModule import *
 from NUSClass import *
-from itertools import combinations
+from SolverTester import *
 set_option(timeout = 10000)
 
 class TimeTableSchedulerZ3 :
@@ -47,7 +47,7 @@ class TimeTableSchedulerZ3 :
                 self.lessonsByDay[l.day - 1].append(l)
                 self.labs.append(l)
 
-        id = 0
+        id = 1
         for day in self.lessonsByDay:
             for nus_class in day:
                 self.hashMap[nus_class] = id
@@ -106,16 +106,17 @@ class TimeTableSchedulerZ3 :
             self.chooseExactlyOne(module.recitations)
             self.chooseExactlyOne(module.labs)
             self.chooseExactlyOneWithPairs(module.lectures)
-        '''
+        
         for day in self.lessonsByDay :
             for NUSCLASS in day :
                 candidates =  list(filter(lambda x : x.willClash(NUSCLASS), day))
-                #print(NUSCLASS)
-                #print(candidates)
+                print("\n")
+                print(NUSCLASS)
+                print(candidates)
+                print("\n")
                 convert = list(map(lambda x : self.StringToBoolLiteralHashMap[str(x)], candidates))
-                if (len(convert) != 1) :
-                   self.chooseAtMostOneLiteral(convert)
-        '''
+                self.chooseAtMostOneLiteral(convert)
+        
 
     def addOtherConstraints(self, fn) :
         raise NotImplementedError
@@ -135,6 +136,7 @@ class TimeTableSchedulerZ3 :
             self.printTimeTable()
         elif (self.s.check() == unsat) :
             print("UNSAT")
+            a = SolverTester(self.s).enumerateClauses()
             print("No feasible timetable")
 
     def printTimeTable(self) :

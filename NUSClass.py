@@ -2,7 +2,11 @@ class NUSClass :
     
     def willClash(self, b) :
         # b clashes with this class if
-        return ((self.start <= b.start < self.end) or (self.start < b.end <= self.end)) and (self.day == b.day)
+        return ((self.day == b.day) 
+            and ((self.start <= b.start < self.end) 
+            or (self.start < b.end <= self.end)
+            or (b.start <= self.start <= b.end and b.start <= self.end <= b.end)))
+        #((self.start <= b.start < self.end) or (self.start < b.end <= self.end)) and (self.day == b.day)
 
 class Lecture(NUSClass) :
 
