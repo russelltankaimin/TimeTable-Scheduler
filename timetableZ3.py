@@ -1,3 +1,4 @@
+from itertools import combinations
 from socket import timeout
 from z3 import *
 from NUSModule import *
@@ -89,11 +90,24 @@ class TimeTableSchedulerZ3 :
             self.chooseExactlyOneLiteral(literalList)
 
     def chooseExactlyOneLiteral(self, literalList) :
-        self.s.add(AtMost(*literalList, 1))
-        self.s.add(AtLeast(*literalList, 1))
+        #self.s.add(AtMost(*literalList, 1))
+        #self.s.add(AtLeast(*literalList, 1))
+        if (len(literalList) == 0) :
+            return
+        elif (len(literalList) == 1) :
+            self.s.add(literalList[0] == True)
+        else : 
+            self.s.add(Or(literalList))
+            for pair in list(combinations(literalList,2)):
+                self.s.add(Not(And(pair)))
 
     def chooseAtMostOneLiteral(self, literalList) :
+        if (len(literalList) == 0) :
+            return
         self.s.add(AtMost(*literalList, 1))
+
+    def convertToLiteral(self, lstClass) :
+        return list(map(lambda x : self.StringToBoolLiteralHashMap[str(x)], lstClass))
 
     def addConstraintTT(self) :
         # for each module
@@ -102,9 +116,15 @@ class TimeTableSchedulerZ3 :
         # for all lessons on the same day : if got clash, negate the boolean variables
         # e.g a = lecture at 6pm - 8pm, b = Rec at 5pm - 7pm, then (a and !b) or (b and !a)
         for [modCode, module] in self.semesterMods.items() :
-            self.chooseExactlyOne(module.tutorials)
-            self.chooseExactlyOne(module.recitations)
-            self.chooseExactlyOne(module.labs)
+            # Convert to literal form (lectures are different)
+            tutorials = self.convertToLiteral(module.tutorials)
+            recitations = self.convertToLiteral(module.recitations)
+            labs = self.convertToLiteral(module.labs)
+
+            # Choose one of the classes
+            self.chooseExactlyOneLiteral(tutorials)
+            self.chooseExactlyOneLiteral(recitations)
+            self.chooseExactlyOneLiteral(labs)
             self.chooseExactlyOneWithPairs(module.lectures)
         
         for day in self.lessonsByDay :
@@ -123,7 +143,7 @@ class TimeTableSchedulerZ3 :
 
     def fixPreferred(self, lst) :
         for item in lst :
-            self.s.add(self.StringToBoolLiteralHashMap[str(item)])
+            self.s.add(self.StringToBoolLiteralHashMap[str(item)] == True)
 
     def optimiseTimetable(self) :
         #self.s.set("produce-proofs", True)

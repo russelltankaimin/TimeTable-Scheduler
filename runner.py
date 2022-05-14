@@ -3,7 +3,7 @@ from NUSClass import *
 from timetableZ3 import TimeTableSchedulerZ3
 
 
-f = open("tests/input.in","r")
+f = open("tests/smaller.in","r")
 print("Input File exists ! \nReading File now ...")
 
 semesterMods = dict()
