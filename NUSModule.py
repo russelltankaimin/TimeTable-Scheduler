@@ -6,6 +6,7 @@ class NUSModule :
         self.recitations = []
         self.tutorials = []
         self.labs = []
+        self.seminars = []
     
     def __str__(self) :
         return self.modCode
@@ -15,6 +16,9 @@ class NUSModule :
     
     def addLectures(self, lec) :
         self.lectures.append(lec)
+
+    def addSeminars(self, sem) :
+        self.seminars.append(sem)
     
     def addLabs(self, lab) :
         self.labs.append(lab)

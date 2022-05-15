@@ -22,6 +22,7 @@ class TimeTableSchedulerZ3 :
         self.tuts = []
         self.recs = []
         self.labs = []
+        self.sems = []
         self.hashMap = {}
         self.IDToLiteralHashMap = {}
         self.StringToBoolLiteralHashMap = {}
@@ -34,6 +35,7 @@ class TimeTableSchedulerZ3 :
             print(str(len(value.lectures)) + " lectures")
             print(str(len(value.tutorials)) + " tutorials")
             print(str(len(value.recitations)) + " recitations")
+            print(str(len(value.seminars)) + " seminars")
             print(str(len(value.labs)) + " labs\n")
             for l in value.lectures :
                 self.lessonsByDay[l.day - 1].append(l)
@@ -47,6 +49,9 @@ class TimeTableSchedulerZ3 :
             for l in value.labs :
                 self.lessonsByDay[l.day - 1].append(l)
                 self.labs.append(l)
+            for s in value.seminars :
+                self.lessonsByDay[s.day - 1].append(s)
+                self.sems.append(s)
 
         id = 1
         for day in self.lessonsByDay:
@@ -56,7 +61,7 @@ class TimeTableSchedulerZ3 :
                 self.LiteralToObject[self.IDToLiteralHashMap[id]] = nus_class
                 self.StringToBoolLiteralHashMap[str(nus_class)] = self.IDToLiteralHashMap[id]
                 id = id + 1
-        # print(self.StringToBoolLiteralHashMap)
+
     def chooseExactlyOne(self, lst) :
         if (len(lst) == 0) :
             return
@@ -76,13 +81,13 @@ class TimeTableSchedulerZ3 :
             self.s.add(self.StringToBoolLiteralHashMap[str(lst[0])] == True)
             return
         else :
-            s = set()
+            setsOfPairs = set()
             literalList = []
             for item in lst :
                 candidates = list(filter(lambda x : x.slot == item.slot, lst))
                 converts = frozenset(map(lambda x : self.StringToBoolLiteralHashMap[str(x)] , candidates))
-                s.add(converts)
-            for pair in s :
+                setsOfPairs.add(converts)
+            for pair in setsOfPairs :
                 if len(pair) == 1 :
                     literalList.append(list(pair)[0])
                 else :
@@ -126,15 +131,16 @@ class TimeTableSchedulerZ3 :
             self.chooseExactlyOneLiteral(recitations)
             self.chooseExactlyOneLiteral(labs)
             self.chooseExactlyOneWithPairs(module.lectures)
+            self.chooseExactlyOneWithPairs(module.seminars)
         
         # Resolve clash constraints
         for day in self.lessonsByDay :
             for NUSCLASS in day :
                 candidates =  list(filter(lambda x : x.willClash(NUSCLASS) and x is not NUSCLASS, day))
-                print("\n")
-                print(NUSCLASS)
-                print(candidates)
-                print("\n")
+                #print("\n")
+                #print(NUSCLASS)
+                #print(candidates)
+                #print("\n")
                 antecedant = self.StringToBoolLiteralHashMap[str(NUSCLASS)]
                 clashLiteral = list(map(lambda x : Not(self.StringToBoolLiteralHashMap[str(x)]), candidates))
                 self.s.add(Implies(antecedant, And(clashLiteral)))
@@ -167,7 +173,7 @@ class TimeTableSchedulerZ3 :
             self.printTimeTable()
         elif (self.s.check() == unsat) :
             print("UNSAT")
-            a = SolverTester(self.s).enumerateClauses()
+            # a = SolverTester(self.s).enumerateClauses()
             print("No feasible timetable")
 
     def printTimeTable(self) :
