@@ -127,18 +127,29 @@ class TimeTableSchedulerZ3 :
             self.chooseExactlyOneLiteral(labs)
             self.chooseExactlyOneWithPairs(module.lectures)
         
+        # Resolve clash constraints
         for day in self.lessonsByDay :
             for NUSCLASS in day :
-                candidates =  list(filter(lambda x : x.willClash(NUSCLASS), day))
+                candidates =  list(filter(lambda x : x.willClash(NUSCLASS) and x is not NUSCLASS, day))
                 print("\n")
                 print(NUSCLASS)
                 print(candidates)
                 print("\n")
-                convert = list(map(lambda x : self.StringToBoolLiteralHashMap[str(x)], candidates))
-                self.chooseAtMostOneLiteral(convert)
+                antecedant = self.StringToBoolLiteralHashMap[str(NUSCLASS)]
+                clashLiteral = list(map(lambda x : Not(self.StringToBoolLiteralHashMap[str(x)]), candidates))
+                self.s.add(Implies(antecedant, And(clashLiteral)))
         
 
     def addOtherConstraints(self, fn) :
+        '''
+        AtMost((MA2104 LEC 1 on Day 3 @ 1000 - 1200,
+        CM1102 LEC 1 on Day 3 @ 1200 - 1400,
+        CS2040S TUT 20 on Day 3 @ 1000 - 1200,
+        CS2040S TUT 29 on Day 3 @ 1200 - 1400,
+        CS2040S TUT 25 on Day 3 @ 1100 - 1300),
+       1)
+        
+        '''
         raise NotImplementedError
 
     def fixPreferred(self, lst) :
