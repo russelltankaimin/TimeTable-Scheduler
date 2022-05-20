@@ -3,7 +3,7 @@ from socket import timeout
 from z3 import *
 from NUSModule import *
 from NUSClass import *
-from SolverTester import *
+from archive.SolverTester import *
 set_option(timeout = 10000)
 
 class TimeTableSchedulerZ3 :
@@ -31,12 +31,12 @@ class TimeTableSchedulerZ3 :
 
     def initVariables(self) :
         for [key, value] in self.semesterMods.items() :
-            print("In " + str(value) + " there are")
-            print(str(len(value.lectures)) + " lectures")
-            print(str(len(value.tutorials)) + " tutorials")
-            print(str(len(value.recitations)) + " recitations")
-            print(str(len(value.seminars)) + " seminars")
-            print(str(len(value.labs)) + " labs\n")
+            #print("In " + str(value) + " there are")
+            #print(str(len(value.lectures)) + " lectures")
+            #print(str(len(value.tutorials)) + " tutorials")
+            #print(str(len(value.recitations)) + " recitations")
+            #print(str(len(value.seminars)) + " seminars")
+            #print(str(len(value.labs)) + " labs\n")
             for l in value.lectures :
                 self.lessonsByDay[l.day - 1].append(l)
                 self.lecs.append(l)
@@ -157,6 +157,21 @@ class TimeTableSchedulerZ3 :
         
         '''
         raise NotImplementedError
+
+    def anotherSolution(self) :
+        literals = self.StringToBoolLiteralHashMap.values()
+        m = self.s.model()
+        self.s.add(Or([t != m.eval(t, model_completion=True) for t in literals]))
+        if (self.s.check() == sat) :
+            print("SAT")
+            self.printTimeTable()
+        elif (self.s.check() == unsat) :
+            print("UNSAT")
+            # a = SolverTester(self.s).enumerateClauses()
+            print("No feasible timetable")
+    
+    def lastSolnStatus(self) :
+        return self.s.check()
 
     def fixPreferred(self, lst) :
         for item in lst :
