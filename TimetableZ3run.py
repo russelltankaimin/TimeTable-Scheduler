@@ -1,16 +1,16 @@
 from scrapper import *
 from timetableZ3 import *
+import sys
 
 OPTIONS = [
 
 ]
+numMods = len(sys.argv) - 1
 
-numMods = int(input("How many modules are you intending to take ? \n"))
+print("You have entered " + str(numMods) + "modules\n") 
 AY = input("Enter Academic Year in the form 2021-2022\n")
 SEM = int(input("Input semester number\n"))
-modules = []
-for i in range(numMods) :
-    modules.append(input("Name of Module : \n"))
+modules = [sys.argv[i] for i in range(1, numMods + 1)]
 
 scrapper = Scrapper(modules, AY, SEM)
 scrapper.scrape()
@@ -18,17 +18,21 @@ scrapper.scrape()
 timetable = TimeTableSchedulerZ3(scrapper.semesterProcessed)
 timetable.optimiseTimetable()
 
-if (timetable.lastSolnStatus == unsat) :
+if (timetable.last_solution_status() == unsat) :
     print("Terminating . . . \n")
 else :
     happy = False
-    print("Are You Happy with this timetable? /n")
-    happy = input("Yes or No only") == "Yes"
+    print("Are You Happy with this timetable? \n")
+    happy = input("Yes or No only \n") == "Yes"
     if (happy != True and happy != False) :
-        print("Wrong input! ")
+        print("Wrong input! \n")
     while(happy != True) :
-        timetable.anotherSolution()
-        print("Are You Happy with this timetable? /n")
-        happy = input("Yes or No only") == "Yes"
+        print("Regenerating timetable... \n")
+        timetable.another_solution()
+        print("Are You Happy with this timetable? \n")
+        happy = input("Yes or No only \n") == "Yes"
         if (happy != True and happy != False) :
             print("Wrong input! ")
+    if (happy) :
+        print("Saving Timetable...\n")
+
