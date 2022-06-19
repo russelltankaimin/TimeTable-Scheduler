@@ -23,6 +23,7 @@ class TimeTableSchedulerZ3 :
         self.recs = []
         self.labs = []
         self.sems = []
+        self.sects = []
         self.string_to_bool_literal = {}
         self.literal_to_object = {}
         self.finalTimetable = [[], [], [], [], []]
@@ -53,8 +54,10 @@ class TimeTableSchedulerZ3 :
             for seminar in value.seminars :
                 self.lessons_by_day[seminar.day - 1].append(seminar)
                 self.sems.append(seminar)
-
-            self.build_hashmaps()
+            for sectional_lesson in value.sectionals :
+                self.lessons_by_day[sectional_lesson.day - 1].append(sectional_lesson)
+                self.sects.append(sectional_lesson)
+        self.build_hashmaps()
 
     def build_hashmaps(self) :
         '''
@@ -90,9 +93,9 @@ class TimeTableSchedulerZ3 :
             SelectOnlyOneSlot(module.tutorials, self.string_to_bool_literal).enforce(self.solver)
             SelectOnlyOneSlot(module.labs, self.string_to_bool_literal).enforce(self.solver)
             SelectOnlyOneSlot(module.seminars, self.string_to_bool_literal).enforce(self.solver)
-
+            SelectOnlyOneSlot(module.sectionals, self.string_to_bool_literal).enforce(self.solver)
         # Resolve Time clash constraints
-        NoClashConstraint(self.lecs + self.tuts + self.recs + self.sems + self.labs, \
+        NoClashConstraint(self.lecs + self.tuts + self.sects + self.recs + self.sems + self.labs, \
                 self.string_to_bool_literal).enforce(self.solver)
 
     def add_other_constraints(self, fn) :

@@ -17,7 +17,11 @@ scrapper.scrape()
 
 timetable = TimeTableSchedulerZ3(scrapper.semesterProcessed)
 timetable.optimiseTimetable()
-
+#print(timetable.solver.sexpr())
+print("Length of SMT2 formulas")
+print(len(timetable.solver.to_smt2()))
+print("LENGTH OF sexpr")
+#print(len(timetable.solver.sexpr()))
 if (timetable.last_solution_status() == unsat) :
     print("Terminating . . . \n")
 else :
@@ -29,6 +33,8 @@ else :
     while(happy != True) :
         print("Regenerating timetable... \n")
         timetable.another_solution()
+ #       print("Length of SMT2 formulas")
+  #      print(len(timetable.solver.to_smt2()))
         print("Are You Happy with this timetable? \n")
         happy = input("Yes or No only \n") == "Yes"
         if (happy != True and happy != False) :
