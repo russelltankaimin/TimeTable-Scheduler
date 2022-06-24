@@ -14,7 +14,7 @@ class TimeTableSchedulerZ3 :
                 4 : "Thursday",
                 5 : "Friday"}
 
-    def __init__(self, module_dict) :
+    def __init__(self, module_dict,print=True) :
         self.semesterMods = module_dict
         self.solver = Solver()
         self.lessons_by_day = [[], [], [], [], []]
@@ -24,6 +24,7 @@ class TimeTableSchedulerZ3 :
         self.labs = []
         self.sems = []
         self.sects = []
+        self.allLessons = []
         self.string_to_bool_literal = {}
         self.literal_to_object = {}
         self.finalTimetable = [[], [], [], [], []]
@@ -57,6 +58,7 @@ class TimeTableSchedulerZ3 :
             for sectional_lesson in value.sectionals :
                 self.lessons_by_day[sectional_lesson.day - 1].append(sectional_lesson)
                 self.sects.append(sectional_lesson)
+        self.allLessons = self.sects + self.lecs + self.tuts + self.recs + self.labs + self.sems
         self.build_hashmaps()
 
     def build_hashmaps(self) :
@@ -95,9 +97,9 @@ class TimeTableSchedulerZ3 :
             SelectOnlyOneSlot(module.seminars, self.string_to_bool_literal).enforce(self.solver)
             SelectOnlyOneSlot(module.sectionals, self.string_to_bool_literal).enforce(self.solver)
         # Resolve Time clash constraints
-        NoClashConstraint(self.lecs + self.tuts + self.sects + self.recs + self.sems + self.labs, \
-                self.string_to_bool_literal).enforce(self.solver)
-
+        NoClashConstraint(self.allLessons,self.string_to_bool_literal).enforce(self.solver)
+        #OneDayFreeConstraint(self.allLessons, self.string_to_bool_literal).enforce(self.solver)
+        #No8AMLessonsConstraint(self.allLessons, self.string_to_bool_literal).enforce(self.solver)
     def add_other_constraints(self, fn) :
         raise NotImplementedError
 

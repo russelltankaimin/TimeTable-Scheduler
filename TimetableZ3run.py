@@ -15,7 +15,7 @@ modules = [sys.argv[i] for i in range(1, numMods + 1)]
 scrapper = Scrapper(modules, AY, SEM)
 scrapper.scrape()
 
-timetable = TimeTableSchedulerZ3(scrapper.semesterProcessed)
+timetable = TimeTableSchedulerZ3(scrapper.semesterProcessed, False)
 timetable.optimiseTimetable()
 #print(timetable.solver.sexpr())
 print("Length of SMT2 formulas")
